@@ -1,5 +1,15 @@
 name = "gemini-chat-app"
 compatibility_date = "2023-12-01"
 
+[build]
+command = "npm run pages:build"
+
 [site]
 bucket = "./out"
+
+[pages]
+pages_build_output_dir = "out"
+
+[[routes]]
+pattern = "/api/*"
+script = "./functions/api"
