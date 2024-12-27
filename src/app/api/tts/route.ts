@@ -3,7 +3,7 @@ import { spawn } from 'child_process';
 import { join } from 'path';
 import fs from 'fs';
 
-export async function POST(request: Request) {
+export async function POST(request: Request): Promise<Response> {
   try {
     const { text } = await request.json();
     
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     // 运行 edge-tts 命令
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       const tts = spawn('edge-tts', [
         '--voice', 'zh-CN-YunxiaNeural',
         '--text', text,
