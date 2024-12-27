@@ -1,31 +1,37 @@
 export async function onRequest(context) {
+  const { request } = context;
+
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 });
+  }
+
   try {
-    const request = context.request;
     const { text } = await request.json();
-    
+
     if (!text) {
       return new Response('No text provided', { status: 400 });
     }
 
     // 使用 Microsoft Edge TTS API
     const VOICE_NAME = 'zh-CN-YunxiaNeural';
-    const ENDPOINT = 'https://api.edge-tts.com/v1/text-to-speech';
-
-    const response = await fetch(ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text,
-        voice: VOICE_NAME,
-        rate: '+0%',
-        volume: '+0%',
-      }),
-    });
+    const response = await fetch(
+      `https://api.edge-tts.com/v1/text-to-speech`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          voice: VOICE_NAME,
+          rate: '+0%',
+          volume: '+0%',
+        }),
+      }
+    );
 
     if (!response.ok) {
-      return new Response('Failed to generate speech', { status: 500 });
+      throw new Error('Failed to generate speech');
     }
 
     const audioBuffer = await response.arrayBuffer();
@@ -36,9 +42,8 @@ export async function onRequest(context) {
         'Cache-Control': 'public, max-age=3600',
       },
     });
-
   } catch (error) {
-    console.error('API Error:', error);
-    return new Response('Internal server error', { status: 500 });
+    console.error('TTS Error:', error);
+    return new Response('Internal Server Error', { status: 500 });
   }
 }

@@ -11,7 +11,7 @@ export default function Home() {
 
   const speak = async (text: string) => {
     try {
-      const response = await fetch('/api/tts', {
+      const response = await fetch('/api/v1/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -4,8 +4,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: '',
-  trailingSlash: true,
+  // 移除这些配置，因为在静态导出模式下不需要
+  // basePath: '',
+  // trailingSlash: true,
 }
 
 module.exports = nextConfig

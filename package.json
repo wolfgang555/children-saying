@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "pages:build": "next build",
+    "pages:build": "npm install && next build",
     "pages:dev": "next dev",
     "pages:deploy": "npm run pages:build"
   },
