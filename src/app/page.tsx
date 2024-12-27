@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export default function Home() {
@@ -9,20 +9,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // 初始化语音列表
-      const loadVoices = () => {
-        // 不需要加载语音列表，因为我们使用的是edge-tts
-      };
-
-      loadVoices();
-    }
-  }, []);
-
   const speak = async (text: string) => {
     try {
-      const response = await fetch('/api/tts', {
+      const response = await fetch('/tts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -30,15 +19,21 @@ export default function Home() {
         body: JSON.stringify({ text }),
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error('Failed to generate speech');
+      }
 
-      if (data.success && data.audioUrl) {
-        if (audioRef.current) {
-          audioRef.current.src = data.audioUrl;
-          await audioRef.current.play();
-        }
-      } else {
-        console.error('TTS Error:', data.error);
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+
+      if (audioRef.current) {
+        audioRef.current.src = audioUrl;
+        await audioRef.current.play();
+        
+        // 清理 URL 对象
+        audioRef.current.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+        };
       }
     } catch (error) {
       console.error('Failed to generate speech:', error);
