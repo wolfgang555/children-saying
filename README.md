@@ -89,3 +89,10 @@ gemini-chat-app/
 - Modern UI with Tailwind CSS
 - Responsive design
 - TypeScript support
+
+
+## push to github
+
+```bash
+GIT_SSH_COMMAND="ssh -i ~/.ssh/gitlab"  git push gh main
+```
