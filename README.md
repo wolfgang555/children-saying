@@ -91,8 +91,21 @@ gemini-chat-app/
 - TypeScript support
 
 
-## push to github
+## Push to GitHub
+
+如果你在 cf 分支上工作，要推送到远程的 main 分支，使用以下命令：
 
 ```bash
-GIT_SSH_COMMAND="ssh -i ~/.ssh/gitlab"  git push gh main
+# 确保你的更改已经提交
+git add .
+git commit -m "your commit message"
+
+# 推送 cf 分支到远程的 main 分支
+GIT_SSH_COMMAND="ssh -i ~/.ssh/gitlab" git push gh cf:main
+```
+
+如果你想切换到 main 分支：
+```bash
+git checkout main
+GIT_SSH_COMMAND="ssh -i ~/.ssh/gitlab" git push gh main
 ```
