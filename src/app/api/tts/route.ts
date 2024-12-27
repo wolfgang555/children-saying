@@ -1,58 +1,48 @@
 import { NextResponse } from 'next/server';
-import { spawn } from 'child_process';
-import { join } from 'path';
-import fs from 'fs';
+
+// 指定使用 Edge Runtime
+export const runtime = 'edge';
 
 export async function POST(request: Request): Promise<Response> {
   try {
     const { text } = await request.json();
     
     if (!text) {
-      return NextResponse.json({ error: 'No text provided' }, { status: 400 });
+      return new Response('No text provided', { status: 400 });
     }
 
-    // 创建临时音频文件的路径
-    const outputDir = join(process.cwd(), 'public', 'audio');
-    const fileName = `speech-${Date.now()}.mp3`;
-    const outputPath = join(outputDir, fileName);
+    // 使用 Microsoft Edge TTS API
+    const VOICE_NAME = 'zh-CN-YunxiaNeural';
+    const ENDPOINT = 'https://api.edge-tts.com/v1/text-to-speech';
 
-    // 确保输出目录存在
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
-
-    // 运行 edge-tts 命令
-    return new Promise<Response>((resolve) => {
-      const tts = spawn('edge-tts', [
-        '--voice', 'zh-CN-YunxiaNeural',
-        '--text', text,
-        '--write-media', outputPath
-      ]);
-
-      tts.on('close', (code) => {
-        if (code === 0) {
-          resolve(NextResponse.json({ 
-            success: true, 
-            audioUrl: `/audio/${fileName}` 
-          }));
-        } else {
-          resolve(NextResponse.json({ 
-            error: 'Failed to generate speech' 
-          }, { status: 500 }));
-        }
-      });
-
-      tts.on('error', (err) => {
-        console.error('TTS Error:', err);
-        resolve(NextResponse.json({ 
-          error: 'Failed to start TTS process' 
-        }, { status: 500 }));
-      });
+    const response = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        voice: VOICE_NAME,
+        rate: '+0%',
+        volume: '+0%',
+      }),
     });
+
+    if (!response.ok) {
+      return new Response('Failed to generate speech', { status: 500 });
+    }
+
+    const audioBuffer = await response.arrayBuffer();
+    
+    return new Response(audioBuffer, {
+      headers: {
+        'Content-Type': 'audio/mpeg',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+
   } catch (error) {
     console.error('API Error:', error);
-    return NextResponse.json({ 
-      error: 'Internal server error' 
-    }, { status: 500 });
+    return new Response('Internal server error', { status: 500 });
   }
 }
